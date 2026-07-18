@@ -1,7 +1,7 @@
 from app.models import User
 from app.repositories.base import BaseRepository
 
-class UserRepository:
+class UserRepository(BaseRepository[User]):
     def get_by_email(self, email: str):
         return self.db.query(User).filter(User.email == email).first()
         
