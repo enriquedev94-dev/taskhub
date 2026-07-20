@@ -11,5 +11,6 @@ class Settings(BaseSettings):
         env_file=".env",
         extra="ignore",
     )
+    secret_key: str
 
 settings = Settings()

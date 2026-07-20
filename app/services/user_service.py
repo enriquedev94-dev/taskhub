@@ -3,12 +3,16 @@ from app.schemas.user import UserCreate
 from app.repositories.project import ProjectRepository
 from app.models import Project
 from app.models import User
-from app.exceptions import EmailAlreadyExistsError
+from app.exceptions import EmailAlreadyExistsError, InvalidCredentialsError
+from app.services.password import PasswordService
+from app.services.token import TokenService
 
 class UserService:
-    def __init__(self, user_repository: UserRepository, project_repository: ProjectRepository):
+    def __init__(self, user_repository: UserRepository, project_repository: ProjectRepository, password_service: PasswordService, token_service: TokenService):
         self.user_repository = user_repository
         self.project_repository = project_repository
+        self.password_service = password_service
+        self.token_service = token_service
 
     def create_user(self, data: UserCreate):
         try:
@@ -20,7 +24,7 @@ class UserService:
             new_user = User(
                 email=data.email,
                 name=data.name,
-                password_hash=data.password
+                password_hash=self.password_service.hash(data.password)
             )
 
             self.user_repository.create(new_user)
@@ -40,3 +44,15 @@ class UserService:
             self.user_repository.db.rollback()
             raise
 
+    def login(self, email: str, password: str):
+        user = self.user_repository.get_by_email(email)
+        if not user or not self.password_service.verify(password, user.password_hash):
+            raise InvalidCredentialsError(
+                details={"reason": "invalid_credentials"}
+            )
+        token = self.token_service.create_access_token(user.id)
+        return {
+            "access_token": token,
+            "token_type": "bearer"
+        }
+        
