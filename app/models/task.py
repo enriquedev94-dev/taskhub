@@ -1,6 +1,7 @@
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from sqlalchemy import Enum
+from app.schemas.task import TaskStatus
 from app.db.base import Base
 
 class Task(Base):
@@ -8,11 +9,13 @@ class Task(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(255))
     description: Mapped[str | None] = mapped_column(nullable=True)
-    status: Mapped[str] = mapped_column(
-        String(50),
-        default="todo",
+    status: Mapped[TaskStatus] = mapped_column(
+        Enum(TaskStatus),
+        default=TaskStatus.TODO,
     )
     project_id: Mapped[int] = mapped_column(
         ForeignKey("projects.id")
     )
-    project: Mapped["Project"] = relationship()
+    project: Mapped["Project"] = relationship(
+        back_populates="tasks"
+    )

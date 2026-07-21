@@ -4,12 +4,14 @@ from app.db.dependencies import get_db
 from app.api.v1.users import router as user_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.projects import router as project_router
+from app.api.v1.tasks import router as task_router
 
 router = APIRouter()
 
 router.include_router(user_router, prefix="/users", tags=["Users"])
 router.include_router(auth_router, prefix="/auth", tags=["Auth"])
 router.include_router(project_router, prefix="/projects", tags=["Projects"])
+router.include_router(task_router, prefix="/tasks", tags=["Tasks"])
 
 @router.get("/debug/session", tags=["Debug"])
 async def debug_session(db: Session = Depends(get_db)):

@@ -13,6 +13,8 @@ from sqlalchemy.orm import Session
 from app.db.dependencies import get_db
 from app.core.security import oauth2_scheme
 from app.core.config import settings
+from app.repositories.task import TaskRepository
+from app.services.task_service import TaskService
 
 def get_user_service(db: Session = Depends(get_db)) -> UserService:
     user_repository = UserRepository(db)
@@ -33,6 +35,11 @@ def get_project_service(db: Session = Depends(get_db)) -> ProjectService:
 
 def get_token_service() -> TokenService:
     return TokenService(secret_key=settings.secret_key)
+
+def get_task_service(db: Session = Depends(get_db)) -> TaskService:
+    task_repository = TaskRepository(db)
+    project_repository=ProjectRepository(db)
+    return TaskService(task_repository=task_repository, project_repository=project_repository)
 
 def get_current_user(
     db: Annotated[Session, Depends(get_db)],
