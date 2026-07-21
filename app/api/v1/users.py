@@ -8,11 +8,11 @@ from app.models import User
 
 router = APIRouter()
 
-@router.post('/users', tags=["Users"])
+@router.post('/')
 async def create_user(user: UserCreate, user_service: Annotated[UserService, Depends(get_user_service)]):
     return user_service.create_user(user)
 
-@router.get('/users/me', tags=["Users"])
+@router.get('/me')
 async def get_me(current_user: Annotated[User, Depends(get_current_user)]):
     return current_user
 

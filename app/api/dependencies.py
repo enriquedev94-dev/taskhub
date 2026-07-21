@@ -3,6 +3,7 @@ from app.models.user import User
 from app.exceptions import InvalidCredentialsError
 from jwt.exceptions import PyJWTError
 from app.services.user_service import UserService
+from app.services.project_service import ProjectService
 from app.services.password import PasswordService
 from app.services.token import TokenService
 from app.repositories.project import ProjectRepository
@@ -25,6 +26,10 @@ def get_user_service(db: Session = Depends(get_db)) -> UserService:
         password_service=password_service,
         token_service=token_service
     )
+
+def get_project_service(db: Session = Depends(get_db)) -> ProjectService:
+    project_repository = ProjectRepository(db)
+    return ProjectService(project_repository=project_repository)
 
 def get_token_service() -> TokenService:
     return TokenService(secret_key=settings.secret_key)
