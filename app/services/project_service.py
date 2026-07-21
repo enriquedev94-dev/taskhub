@@ -3,7 +3,8 @@ from app.repositories.project import ProjectRepository
 from app.schemas.project import ProjectCreate
 from app.models import Project
 from app.models import User
-
+from app.core.logging import get_logger
+logger = get_logger(__name__)
 class ProjectService:
     def __init__(self, project_repository: ProjectRepository):
         self.project_repository = project_repository
@@ -14,9 +15,11 @@ class ProjectService:
             description=data.description,
             owner_id=current_user.id
         )
+        logger.info(f"Creating project '{new_project.name}' for user {current_user.id}")
         self.project_repository.create(new_project)
         self.project_repository.db.commit()
         self.project_repository.db.refresh(new_project)
+        logger.info(f"Project '{new_project.name}' created successfully with ID {new_project.id} for user {current_user.id}")
         return new_project
     
     def get_projects(self, owner_id: int):
@@ -36,10 +39,12 @@ class ProjectService:
             raise ProjectNotFoundError(
                 details={"project_id": project_id}
             )
+        logger.info(f"Updating project '{project.name}' (ID: {project.id}) for user {current_user.id}")
         project.name = data.name
         project.description = data.description
         self.project_repository.db.commit()
         self.project_repository.db.refresh(project)
+        logger.info(f"Project '{project.name}' (ID: {project.id}) updated successfully for user {current_user.id}")
         return project
     
     def delete_project(self, project_id: int, current_user: User):
@@ -50,4 +55,5 @@ class ProjectService:
             )
         self.project_repository.delete(project)
         self.project_repository.db.commit()
+        logger.info(f"Project '{project.name}' (ID: {project.id}) deleted successfully for user {current_user.id}")
         return
