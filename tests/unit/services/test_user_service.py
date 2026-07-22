@@ -4,13 +4,14 @@ from app.schemas.user import UserCreate
 from app.repositories.user import UserRepository
 from app.models.user import User
 from app.exceptions.user import EmailAlreadyExistsError
-
+ 
 def test_create_user_when_email_exists(mocker):
     mock_user_repository = mocker.Mock()
     mock_user_repository.get_by_email.return_value = User(
         name="Existing User", email="carlos@gmail.com"
     )
     mock_project_repository = mocker.Mock()
+    mock_project_repository.db = mocker.Mock()
     mock_password_service = mocker.Mock()
     mock_token_service = mocker.Mock()
     user_service = UserService(
