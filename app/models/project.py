@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, String, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -16,3 +16,6 @@ class Project(Base):
     tasks: Mapped[list["Task"]] = relationship(
         back_populates="project"
         )
+    __table_args__ = (
+        Index("ix_projects_owner_id", "owner_id"),
+    )

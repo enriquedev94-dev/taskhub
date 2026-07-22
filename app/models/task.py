@@ -1,5 +1,6 @@
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Index
 from sqlalchemy import Enum
 from app.schemas.task import TaskStatus
 from app.db.base import Base
@@ -18,4 +19,7 @@ class Task(Base):
     )
     project: Mapped["Project"] = relationship(
         back_populates="tasks"
+    )
+    __table_args__ = (
+        Index("ix_tasks_project_id", "project_id"),
     )
