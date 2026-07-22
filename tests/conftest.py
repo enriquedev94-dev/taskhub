@@ -1,10 +1,13 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+from httpx import AsyncClient, ASGITransport
+from app.db.dependencies import get_db
+import pytest_asyncio
 from app.db.base import Base
 from app.models import User, Project, Task
-
+from app.main import app
+from app.services.password import PasswordService
 
 engine = create_engine(
     "sqlite:///:memory:",
@@ -29,3 +32,32 @@ def db_session():
     finally:
         db.close()
         Base.metadata.drop_all(bind=engine)
+
+@pytest_asyncio.fixture()
+async def client(db_session):
+    def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+    ) as Client:
+        yield Client
+
+    app.dependency_overrides.clear()
+
+@pytest_asyncio.fixture()
+def test_user(db_session):
+    password_service = PasswordService()
+
+    user = User(
+        name="Test User",
+        email="test@example.com",
+        password_hash=password_service.hash("password123")
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user

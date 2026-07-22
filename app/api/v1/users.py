@@ -1,5 +1,6 @@
 from app.schemas.user import UserCreate
 from app.schemas.auth import AuthRequest
+from app.schemas.user import UserResponse
 from app.services.user_service import UserService
 from fastapi import APIRouter, Depends
 from typing import Annotated
@@ -8,7 +9,7 @@ from app.models import User
 
 router = APIRouter()
 
-@router.post('/')
+@router.post('/', response_model=UserResponse)
 async def create_user(user: UserCreate, user_service: Annotated[UserService, Depends(get_user_service)]):
     return user_service.create_user(user)
 
