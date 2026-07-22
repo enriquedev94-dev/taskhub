@@ -61,3 +61,29 @@ def test_user(db_session):
     db_session.commit()
     db_session.refresh(user)
     return user
+
+@pytest_asyncio.fixture()
+async def auth_headers(client, test_user):
+    response = await client.post(
+        '/api/v1/auth/login',
+        json={
+            "email": test_user.email,
+            "password": "password123"
+        }
+    )
+    token = response.json()["access_token"]
+    return {
+        "Authorization": f"Bearer {token}"
+    }
+
+@pytest.fixture()
+def test_project(db_session, test_user):
+    project = Project(
+        name="Test Project",
+        description="This is a test project",
+        owner_id=test_user.id
+    )
+    db_session.add(project)
+    db_session.commit()
+    db_session.refresh(project)
+    return project
