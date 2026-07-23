@@ -1,6 +1,7 @@
 
 from fastapi import APIRouter, Depends
 from typing import Annotated
+from app.api.dependencies import PaginationParams
 from app.schemas.task import TaskCreate
 from app.services.task_service import TaskService
 from app.api.dependencies import get_task_service
@@ -36,5 +37,5 @@ async def create_task(project_id: int, task: TaskCreate, task_service: Annotated
     return task_service.create_task(data=task, project_id=project_id, current_user=current_user)
 
 @router.get('/{project_id}/tasks')
-async def get_tasks(project_id: int, task_service: Annotated[TaskService, Depends(get_task_service)], current_user: Annotated[User, Depends(get_current_user)]):
-    return task_service.get_tasks(project_id=project_id, owner_id=current_user.id)
+async def get_tasks(project_id: int, task_service: Annotated[TaskService, Depends(get_task_service)], current_user: Annotated[User, Depends(get_current_user)], pagination: Annotated[PaginationParams, Depends()]):
+    return task_service.get_tasks(project_id=project_id, owner_id=current_user.id, pagination=pagination)
