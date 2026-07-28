@@ -1,6 +1,6 @@
 from app.repositories.task import TaskRepository
 from app.models import Task, Project, User
-from app.api.dependencies import PaginationParams
+from app.schemas.pagination import PaginationParams
 from app.exceptions.project import ProjectNotFoundError
 from app.exceptions import TaskNotFoundError
 from app.repositories.project import ProjectRepository

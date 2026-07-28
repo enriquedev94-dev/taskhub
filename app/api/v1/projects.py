@@ -1,7 +1,7 @@
 
 from fastapi import APIRouter, Depends
 from typing import Annotated
-from app.api.dependencies import PaginationParams
+from app.schemas.pagination import PaginationParams
 from app.schemas.task import TaskCreate
 from app.services.task_service import TaskService
 from app.api.dependencies import get_task_service
