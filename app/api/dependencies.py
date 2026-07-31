@@ -57,6 +57,7 @@ def get_current_user(
             )
             
         user = UserRepository(db).get_by_id(User, int(user_id))
+
         if not user:
             raise InvalidCredentialsError(
                 details={"error": "Invalid credentials"}
@@ -65,6 +66,8 @@ def get_current_user(
     except InvalidCredentialsError:
         raise
     except PyJWTError as e:
+        print(type(e))
+        print(repr(e))
         raise InvalidCredentialsError(
             details={"error": "Invalid credentials"}
         ) from e

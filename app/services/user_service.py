@@ -56,6 +56,7 @@ class UserService:
                 details={"reason": "invalid_credentials"}
             )
         token = self.token_service.create_access_token(user.id)
+        
         logger.info(f"User {user.id} logged in successfully")
         return {
             "access_token": token,

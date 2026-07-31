@@ -1,10 +1,13 @@
 from app.repositories.task import TaskRepository
 from app.models import Task, Project, User
 from app.schemas.pagination import PaginationParams
+from app.schemas.common import PaginatedResponse
+from app.schemas.task import TaskResponse
 from app.exceptions.project import ProjectNotFoundError
 from app.exceptions import TaskNotFoundError
 from app.repositories.project import ProjectRepository
 from app.schemas.task import TaskCreate
+import math
 from app.core.logging import get_logger
 logger = get_logger(__name__)
 class TaskService:
@@ -30,14 +33,33 @@ class TaskService:
         logger.info(f"Task '{new_task.title}' created successfully with ID {new_task.id} for project {project_id} by user {current_user.id}")
         return new_task
     
-    def get_tasks(self, project_id: int, owner_id: int, pagination: PaginationParams):
+    def get_tasks(self, project_id: int, owner_id: int, pagination: PaginationParams, search: str | None = None)-> PaginatedResponse[TaskResponse]:
         project = self.project_repository.get_by_id(Project, project_id)
         if not project or project.owner_id != owner_id:
             raise ProjectNotFoundError(
                 details={"project_id": project_id},
             )
-        total = self.task_repository.count_by_project_id(project_id)
-        return self.task_repository.get_by_project_id(project_id, limit=pagination.limit, offset=pagination.offset)
+        total = self.task_repository.count_by_project_id(project_id, search=search)
+
+        tasks = [
+            TaskResponse.model_validate(task)
+            for task in self.task_repository.get_by_project_id(
+                project_id,
+                limit=pagination.limit,
+                offset=pagination.offset,
+                search=search,
+            )
+        ]
+
+        print(f"Retrieved {tasks}'")
+
+        return PaginatedResponse(
+            items=tasks,
+            page=pagination.page,
+            page_size=pagination.size,
+            total_items=total,
+            total_pages=max(1, math.ceil(total / pagination.size)),
+        )
     
     def get_task(self, task_id: int, owner_id: int):
         task = self.task_repository.get_by_id(Task, task_id)
